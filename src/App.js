@@ -29,8 +29,9 @@ const Login = props => (
       </Form.Group>
       <p>Select Client</p>
       <select  onChange={props.handleChangeSelect}>
-      {props.clients.map((client, i) => (
+      {props.clients.map((client, i) => ( //creates options corresponding to the clients array from API
             <option
+              name={client.name}
               value={client.clientId}
               key={i}>
               {client.name}
@@ -62,7 +63,7 @@ const ProjectTable = props => (
       <th>Completed</th>
     </tr>
   </thead>
-  {props.projects.map((project, i) => (
+  {props.projects.map((project, i) => ( //creates corresponding rows for each project in the array from the API
             <tr
               key={i}>
               <td>{project.name}</td>
@@ -89,7 +90,7 @@ class App extends Component {
     loginSuccess: false
   };
 
-  componentDidMount() {
+  componentDidMount() { //GET route when page loads to populate the dropdown menu on the login screen
     $.get("https://imswebapi.azurewebsites.net/api/clientmanager/clientlist").then(result => {
       this.setState({ clients: result.data });
       this.setState({ client: result.data[0].name });
@@ -98,7 +99,7 @@ class App extends Component {
   }
 
 
-  handleSubmit = event => {
+  handleSubmit = event => { //function that executes when Login button is pressed: POST route to receive token for authentication
     event.preventDefault();
     var that = this;
     $.post("https://imswebapi.azurewebsites.net/api/user/login", {email: this.state.email, password: this.state.password, clientId: this.state.clientID
@@ -106,18 +107,17 @@ class App extends Component {
     this.setState({ token: result.data.token });
       var clID = that.state.clientID;
       var token = that.state.token;
-      $.get(`https://imswebapi.azurewebsites.net/api/client/${clID}/project/getprojectlist`, {headers: {
+      $.get(`https://imswebapi.azurewebsites.net/api/client/${clID}/project/getprojectlist`, {headers: { //GET route to populate table with projects
         Authorization: 'Bearer ' + token 
       }
     })
       .then(result => {
-        console.log(result.data);
         this.setState({ projects: result.data });
       })
       this.setState({ loginSuccess: true });
     }
     
-  ).catch(result => {
+  ).catch(result => { //if there is an error, alert the user
       alert("Invalid Login");
   })
 }
@@ -132,7 +132,7 @@ class App extends Component {
   };
 
   handleChangeSelect = event => {
-    this.setState({ client: event.target.value });
+    this.setState({ client: event.target.name });
     this.setState({ clientID: event.target.value });
   };
 
